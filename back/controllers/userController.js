@@ -1,5 +1,7 @@
 import Suser from "../models/suserModel.js";
 
+import {sendEmail} from "../utils/sendEmail.js"
+
 /**
  * @desc    Get all users
  * @route   GET /api/users
@@ -8,6 +10,7 @@ import Suser from "../models/suserModel.js";
 export const getAllUsers = async (req, res) => {
     try {
         const users = await Suser.find({}, "-password"); // exclude password field
+        // const users = await Suser.find({}); // include password field
         return res.status(200).json({
             success: true,
             message: "All users fetched successfully",
@@ -28,42 +31,159 @@ export const getAllUsers = async (req, res) => {
  * @route   POST /api/users/register
  * @access  Public
  */
+
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Basic validation
         if (!name || !email || !password) {
-            return res
-                .status(400)
-                .json({ success: false, message: "All fields are required" });
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
         }
 
-        // Check if user already exists
         const existingUser = await Suser.findOne({ email });
         if (existingUser) {
-            return res
-                .status(409)
-                .json({ success: false, message: "Email is already registered" });
+            return res.status(409).json({
+                success: false,
+                message: "Email is already registered",
+            });
         }
 
-        // Generate custom user ID
         const suid = `SUSER-${Date.now()}`;
+        const accesstoken = "";
+        const sessionAccesstoken = "";
+        const emailVerifyAccesstoken = `${Math.floor(
+            100000 + Math.random() * 900000
+        )}`;
+        const emailVerify = false;
 
-        // Create and save new user
-        const newUser = await Suser.create({ suid, name, email, password });
+        const newUser = await Suser.create({
+            suid,
+            name,
+            email,
+            password,
+            accesstoken,
+            sessionAccesstoken,
+            emailVerifyAccesstoken,
+            emailVerify,
+        });
 
-        // Exclude password from response
+        await sendEmail(
+            email,
+            "Verify Email",
+            `Your verification code is: ${emailVerifyAccesstoken}`
+        );
+
         const userResponse = newUser.toObject();
         delete userResponse.password;
 
         return res.status(201).json({
             success: true,
-            message: "User registered successfully",
+            message: "User registered successfully. Check your email for OTP.",
             user: userResponse,
         });
     } catch (error) {
         console.error("Error registering user:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+
+
+
+
+
+
+export const verifyEmail = async (req, res) => {
+    try {
+        const { email,password, otp } = req.body;
+
+        if (!email || !password || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Email with New Password and OTP required",
+            });
+        }
+
+        const user = await Suser.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (user.emailVerifyAccesstoken !== otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP",
+            });
+        }
+
+        user.emailVerify = true;
+        user.emailVerifyAccesstoken = "";
+        user.password = password;
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully",
+        });
+    } catch (error) {
+        console.error("Error verifying email:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required",
+            });
+        }
+
+        const user = await Suser.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
+
+        user.emailVerifyAccesstoken = otp;
+        await user.save();
+
+        await sendEmail(
+            email,
+            "Reset Your Password",
+            `Your password reset OTP is: ${otp}`
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent to your email",
+        });
+
+    } catch (error) {
+        console.error("Forgot password error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
