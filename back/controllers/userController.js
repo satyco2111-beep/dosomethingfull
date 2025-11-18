@@ -1,4 +1,6 @@
 import Suser from "../models/suserModel.js";
+import jwt from "jsonwebtoken";
+
 
 import {sendEmail} from "../utils/sendEmail.js"
 
@@ -9,8 +11,8 @@ import {sendEmail} from "../utils/sendEmail.js"
  */
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await Suser.find({}, "-password"); // exclude password field
-        // const users = await Suser.find({}); // include password field
+        // const users = await Suser.find({}, "-password"); // exclude password field
+        const users = await Suser.find({}); // include password field
         return res.status(200).json({
             success: true,
             message: "All users fetched successfully",
@@ -93,10 +95,6 @@ export const registerUser = async (req, res) => {
         });
     }
 };
-
-
-
-
 
 
 export const verifyEmail = async (req, res) => {
@@ -184,6 +182,108 @@ export const forgotPassword = async (req, res) => {
 
     } catch (error) {
         console.error("Forgot password error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+
+
+
+export const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and password are required",
+            });
+        }
+
+        const user = await Suser.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (!user.emailVerify) {
+            return res.status(401).json({
+                success: false,
+                message: "Please verify your email first",
+            });
+        }
+
+        const isMatch = await user.comparePassword(password);
+
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Incorrect password",
+            });
+        }
+
+        // Create JWT token
+        const token = jwt.sign(
+            { id: user.suid, email: user.email },
+            "SECRET_KEY",
+            { expiresIn: "7d" }
+        );
+
+        user.accesstoken = token;
+        await user.save();
+
+        const userData = user.toObject();
+        delete userData.password;
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            user: userData,
+        });
+
+    } catch (error) {
+        console.log("Login error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+
+
+
+
+export const logoutUser = async (req, res) => {
+    try {
+        const {suid} = req.body;
+
+        const user = await Suser.findOne({suid});
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        user.accesstoken = "";
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful",
+        });
+
+    } catch (error) {
+        console.log("Logout error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
