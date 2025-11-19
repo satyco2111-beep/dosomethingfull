@@ -291,3 +291,41 @@ export const logoutUser = async (req, res) => {
         });
     }
 };
+
+
+//  ========= GET USER BY SUID ====================
+
+export const getUserBySuid = async (req, res) => {
+    try {
+        const { suid } = req.params;
+
+        if (!suid) {
+            return res.status(400).json({
+                success: false,
+                message: "suid is required",
+            });
+        }
+
+        const user = await Suser.findOne({ suid });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User fetched successfully",
+            user,
+        });
+    } catch (error) {
+        console.error("Error fetching user by suid:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};

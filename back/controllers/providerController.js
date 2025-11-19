@@ -374,3 +374,42 @@ export const logoutProvider = async (req, res) => {
         });
     }
 };
+
+
+
+//   ============   SINGLE PROVIDER ==============
+
+export const getProviderById = async (req, res) => {
+    try {
+        const { sprovid } = req.params;
+
+        if (!sprovid) {
+            return res.status(400).json({
+                success: false,
+                message: "sprovid is required",
+            });
+        }
+
+        const provider = await Sprovider.findOne({ sprovid });
+
+        if (!provider) {
+            return res.status(404).json({
+                success: false,
+                message: "Provider not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Provider fetched successfully",
+            provider,
+        });
+    } catch (error) {
+        console.error("Error fetching provider by sprovid:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
