@@ -7,6 +7,8 @@ import localAriaRouter from "./loaclCityRoute.js"
 import servicesRouter from "./servicesRoute.js"
 import providerRouter from "./providerRoute.js"
 import workRouter from "./workRoute.js"
+import commentRouter from "./commentRoute.js"
+import reviewRouter from "./reviewRoute.js"
 
 
 
@@ -18,6 +20,8 @@ RouterMain.use("/local-aria", localAriaRouter);
 RouterMain.use("/services", servicesRouter);
 RouterMain.use("/providers", providerRouter);
 RouterMain.use("/works", workRouter);
+RouterMain.use("/comment", commentRouter);
+RouterMain.use("/review", reviewRouter);
 
 
 export default RouterMain;

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import Suser from "../models/suserModel.js";
 
 
-export const authMiddleware = async (req, res, next) => {
+export const userAuthMiddleware = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.replace("Bearer ", "");
 

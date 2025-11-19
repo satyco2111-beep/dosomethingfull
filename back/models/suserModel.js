@@ -17,8 +17,6 @@
 
 // const Suser = mongoose.model("Suser", userSchema);
 // export default Suser;
- 
-
 
 /////////////////////
 
@@ -30,11 +28,14 @@ const SuserSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
+    roll: { type: String, default: "1" },
     accesstoken: String,
     sessionAccesstoken: String,
     emailVerifyAccesstoken: String,
     emailVerify: Boolean,
-});
+},
+  { timestamps: true }
+);
 
 // Hash password before saving
 SuserSchema.pre("save", async function (next) {
