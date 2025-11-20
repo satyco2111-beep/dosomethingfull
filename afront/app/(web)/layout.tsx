@@ -1,3 +1,5 @@
+import  Header from "@/app/component/web/header"
+
 export default function WebLayout({
   children,
 }: {
@@ -5,7 +7,7 @@ export default function WebLayout({
 }) {
   return (
     <main>
-      this is web routes
+      <Header />
       {children}
       </main>
   )
