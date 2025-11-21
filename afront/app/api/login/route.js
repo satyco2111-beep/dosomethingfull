@@ -43,24 +43,24 @@ export async function POST(req) {
 
 
 
-export async function GET() {
-  try {
-    const response = await fetch("http://localhost:8000/api/user/users", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+// export async function GET() {
+//   try {
+//     const response = await fetch("http://localhost:8000/api/user/users", {
+//       method: "GET",
+//       headers: { "Content-Type": "application/json" },
+//     });
 
-    const data = await response.json(); // <-- important!
+//     const data = await response.json(); // <-- important!
 
-    return NextResponse.json({
-      success: true,
-      msg: "API is working",
-      data: data,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, msg: "Something went wrong", error: error.message },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json({
+//       success: true,
+//       msg: "API is working",
+//       data: data,
+//     });
+//   } catch (error) {
+//     return NextResponse.json(
+//       { success: false, msg: "Something went wrong", error: error.message },
+//       { status: 500 }
+//     );
+//   }
+// }

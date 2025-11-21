@@ -2,7 +2,6 @@
 
 
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie"; // allowed in client components
 
 export default  function AddWorkPage() {
 
@@ -16,6 +15,8 @@ export default  function AddWorkPage() {
     sctyid: "",
     sloctyid: "",
     ssrvcid: "",
+    // status: "OPEN",
+    // paymentStatus: "UNPAID",
     price: "",
     suid: "",
     sprovid: "",
@@ -23,24 +24,20 @@ export default  function AddWorkPage() {
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
+   const [cookies, setCookies] = useState({ token: null, role: null, id: null });
+
 
   // GET USER ID FROM COOKIES
   useEffect(() => {
-    // const userId = Cookies.get("id");
-    const cookieString = document.cookie;
-
-    // extract user id from cookie
-    const match = cookieString.match(/(?:^|; )id=([^;]*)/);
-
-    const userId = match ? decodeURIComponent(match[1]) : null;
-
-    if (userId) {
-      setForm((p) => ({ ...p, suid: userId }));
+      async function fetchCookies() {
+      const res = await fetch("/api/cookies", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      setCookies(data);
+      setForm((p) => ({ ...p, suid: data.id }))
     }
-      console.log("userId",userId)
-
-      // console.log("ccccc",document.cookie);
-      // console.log("ffcccsss",getCookie("token"));  
+    fetchCookies();
   }, []);
 
   // FETCH CITY, LOCAL AREA, SERVICE FROM NODE JS API
@@ -87,9 +84,11 @@ export default  function AddWorkPage() {
   }
 
 
-  console.log("cities",cities)
-  console.log("localAreas",localAreas)
-  console.log("services",services)
+  // console.log("cities",cities)
+  // console.log("localAreas",localAreas)
+  // console.log("services",services)
+  // console.log("form",form)
+  // console.log("cookies",cookies)
 
 
   return (
@@ -206,3 +205,13 @@ export default  function AddWorkPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+

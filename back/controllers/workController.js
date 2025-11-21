@@ -183,6 +183,11 @@ export const deleteWork = async (req, res) => {
 
 
 
+export const getWorksByUser = async (req, res) => {
+  const { id } = req.params;
+  const works = await Swork.find({ suid: id });
+  res.json({ success: true, works });
+};
 
 
 
