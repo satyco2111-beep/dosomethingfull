@@ -5,23 +5,74 @@ import Swork from "../models/workModel.js";
  * @route   GET /api/works
  * @access  Public / Admin
  */
+// export const getAllWorks = async (req, res) => {
+//     try {
+//         const works = await Swork.find({});
+//         return res.status(200).json({
+//             success: true,
+//             message: "All works fetched successfully",
+//             works,
+//         });
+//     } catch (error) {
+//         console.error("Error fetching works:", error);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Internal Server Error",
+//             error: error.message,
+//         });
+//     }
+// };
+
+
+
+// GET /api/works?status=&service=&title=&city=&local=&page=&limit=
 export const getAllWorks = async (req, res) => {
-    try {
-        const works = await Swork.find({});
-        return res.status(200).json({
-            success: true,
-            message: "All works fetched successfully",
-            works,
-        });
-    } catch (error) {
-        console.error("Error fetching works:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message,
-        });
-    }
+  try {
+    const {
+      status,
+      service,
+      title,
+      city,
+      local,
+      page = 1,
+      limit = 6,
+    } = req.query;
+
+    const query = {};
+
+    if (status) query.status = status;
+    if (service) query.ssrvcid = service;
+    if (city) query.sctyid = city;
+    if (local) query.sloctyid = local;
+    if (title) query.title = { $regex: title, $options: "i" };
+
+    const skip = (page - 1) * limit;
+
+    const total = await Swork.countDocuments(query);
+    const works = await Swork.find(query)
+      .skip(skip)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      works,
+      pagination: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
+
+
+
 
 /**
  * @desc    Get a single work by ID
