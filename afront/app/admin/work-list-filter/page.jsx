@@ -88,7 +88,8 @@ export default function WorksPage() {
                     <option value="">All Status</option>
                     <option value="OPEN">OPEN</option>
                     <option value="ACCEPTED">ACCEPTED</option>
-                    <option value="completed">Completed</option>
+                    <option value="STARTED">STARTED</option>
+                    <option value="COMPLETED">COMPLETED</option>
                 </select>
 
                 <select name="service" className="border p-2" onChange={handleFilterChange}>
@@ -128,13 +129,14 @@ export default function WorksPage() {
                         <span className="text-xs bg-blue-100 px-2 py-1 rounded">
                             {w.status || "pending"}
                         </span>
+                        {w.status ==="OPEN"? 
                         <p>
                             <span className="text-xs bg-blue-100 px-2 py-1 rounded">
                                 {/* {w.swrid || "pending"} */}
                                 <Link href={`/admin/work-full-detils/${w.swrid}`} >Full Details </Link>
                                 
                             </span>
-                        </p>
+                        </p>:null}
 
 
 
