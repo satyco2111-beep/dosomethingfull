@@ -133,6 +133,7 @@ export default function WorkDetailsPage() {
           <h2 className="text-xl font-semibold mb-2">Posted By</h2>
           <p>👤 Name: <b>{user?.name}</b></p>
           <p>📧 Email: <b>{user?.email}</b></p>
+          <p>📧 Mobile: <b>{user?.mobile}</b></p>
           <p>🆔 User ID: {user?.suid}</p>
         </section>
 
