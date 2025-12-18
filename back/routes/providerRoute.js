@@ -21,6 +21,8 @@ import {
     loginProvider,
     logoutProvider,
     getProviderById,
+    providerPaymentComplete,
+    providerPaymentDue
 } from "../controllers/providerController.js";
 
 import { providerAuthMiddleware } from "../middleware/providerAuth.js";
@@ -34,4 +36,6 @@ providerRouter.post("/forgot-password", providerForgotPassword);
 providerRouter.post("/login", loginProvider);
 providerRouter.post("/logout", providerAuthMiddleware, logoutProvider);
 providerRouter.get("/provider/:sprovid", getProviderById);
+providerRouter.put("/payment-due/:sprovid", providerPaymentDue);
+providerRouter.put("/payment-complete/:sprovid", providerPaymentComplete);
 export default providerRouter;
